@@ -45,7 +45,7 @@ Let’s look at our treatment data
     ##  3rd Qu.:3.000   3rd Qu.:2.5  
     ##  Max.   :3.000   Max.   :4.0
 
-##### My plan to clean up the treatment data
+#### My plan to clean up the treatment data
 
 ###### (1) Recode Likert questions and add labels
 
@@ -115,7 +115,7 @@ var_label(StudyData) <- list(Study_ID = "Study ID",Student_ID="District ID",
                         LikertQ3.R="I don't want to come to school", Treatment="Treatment status")
 ```
 
-##### Read in discipline and demographics
+#### Now we can read in discipline and demographics so we can merge it with our study data
 
 Read in our two district files that are
 cleaned

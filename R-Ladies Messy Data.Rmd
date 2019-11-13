@@ -128,7 +128,7 @@ knitr::opts_chunk$set(echo = FALSE)
 | Append data           | dplyr::bind_rows                                               |
 | Add variable labels   | labelled::var_label                                            |
 | Make codebook         | dataMaid::makeCodebook                                         |
-| Export data           | readr::write_csv, openxlsx::write.xlsx; writexl::write_xlsx    |
+| Export data           | readr::write_csv; openxlsx::write.xlsx; writexl::write_xlsx    |
 
 ## Tidyverse 
 - Most of these packages can be loaded through the [Tidyverse](https://www.tidyverse.org/)

@@ -34,7 +34,7 @@ knitr::kable(head(StudyData))
 summary(StudyData)
 ```
 
-##### My plan to clean up the treatment data
+#### My plan to clean up the treatment data
 ###### (1) Recode Likert questions and add labels
 ###### (2) Add labels to treatment vars
 ###### (3) Add variable labels
@@ -74,7 +74,7 @@ var_label(StudyData) <- list(Study_ID = "Study ID",Student_ID="District ID",
 
 ```
 
-##### Read in discipline and demographics
+#### Now we can read in discipline and demographics so we can merge it with our study data
 
 Read in our two district files that are cleaned
 ```{r, warning=FALSE, message=FALSE}

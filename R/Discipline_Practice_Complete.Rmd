@@ -1,0 +1,132 @@
+---
+title: "Discipline Cleaning Practice"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#### Crystal Lewis
+#### 11/12/2019
+
+
+#### Install and call packages we need
+
+Install packages
+```{r, results='hide', warning=FALSE, message=FALSE, eval=FALSE}
+install.packages(c("tidyverse", "lubridate","labelled", "dataMaid"))
+```
+
+Call the packages
+```{r, results='hide', warning=FALSE, message=FALSE}
+library(tidyverse)
+library(lubridate)
+library(labelled)
+```
+
+What does our data currently look like?
+```{r,echo=FALSE, message=FALSE}
+ISS<-read_csv("https://raw.githubusercontent.com/Cghlewis/R-Ladies-STL-Cleaning-Data-R/master/Data/Discipline.csv")
+knitr::kable(head(ISS, 3))
+```
+
+What do we want our data to look like?
+```{r,echo=FALSE, message=FALSE}
+ISSFinal<-read_csv("https://raw.githubusercontent.com/Cghlewis/R-Ladies-STL-Cleaning-Data-R/master/Data/Clean_Discipline_2018_19.csv")
+knitr::kable(head(ISSFinal, 3))
+```
+
+##### My plan
+###### (1) Read in the file
+###### (2) Drop unncessary variables
+###### (3) Rename columns
+###### (4) Create a mont column
+###### (5) Create an ISS column
+###### (6) Filter to only ISS cases
+###### (7) Group by StudentID and Month and count ISS incidents for Fall and Spring
+###### (8) Merge the Fall and Spring together
+###### (9) Fill NA ISS with zeros
+###### (10) Add variable labels
+
+Read in our discipline file using `read_csv`
+```{r, results='hide', warning=FALSE, message=FALSE}
+ISS<-read_csv('https://raw.githubusercontent.com/Cghlewis/R-Ladies-STL-Cleaning-Data-R/master/Data/Discipline.csv')
+```
+Drop Incident Description and Incident Place using `select`
+```{r, warning=FALSE, message=FALSE}
+names(ISS)
+ISS<-ISS%>%select(-contains("Incident"))
+```
+Rename the Student ID column using `rename`
+```{r, results='hide', warning=FALSE, message=FALSE}
+names(ISS)
+ISS<-ISS%>%rename(Student_ID=`Student ID`)
+```
+Create a month column using `mutate`, `mdy` and `month`
+```{r, warning=FALSE, message=FALSE}
+glimpse(ISS)
+ISS<-ISS%>%mutate(Month=month(mdy(Date)))
+head(as.data.frame(ISS))
+```
+Create a column with just ISS using `str_extract`
+```{r, warning=FALSE, message=FALSE}
+ISS<-ISS%>%mutate(ISSvar=str_extract(Action, "ISS"))
+head(as.data.frame(ISS))
+```
+Filter to keep only the rows where ISS occurred using `filter`
+```{r, warning=FALSE, message=FALSE}
+ISS<-ISS%>%filter(ISSvar=="ISS")
+```
+Count the number of ISS per Student for fall/spring using `filter`, `group_by` and `summarise`
+```{r, warning=FALSE, message=FALSE}
+ISS_S<-ISS%>%filter(Month<6)%>%group_by(Student_ID)%>%
+  summarise(Spring_ISS=n())
+
+ISS_F<-ISS%>%filter(Month>7)%>%group_by(Student_ID)%>%
+  summarise(Fall_ISS=n())
+
+head(as.data.frame(ISS_S))
+head(as.data.frame(ISS_F))
+```
+Merge the two data together
+```{r, warning=FALSE, message=FALSE}
+ISSJoin<-full_join(ISS_F, ISS_S, by="Student_ID")
+head(as.data.frame(ISSJoin))
+```
+Fill NA ISS with 0s using `replace_na`
+```{r, warning=FALSE, message=FALSE}
+ISSJoin<-ISSJoin%>%tidyr::replace_na(list(Fall_ISS=0, Spring_ISS=0))
+```
+Add variable labels using `var_label`
+```{r, warning=FALSE, message=FALSE}
+names(ISSJoin)
+var_label(ISSJoin) <- list(Student_ID="Student ID", Fall_ISS="Fall ISS referrals",
+                        Spring_ISS="Spring ISS referrals")
+```
+
+##### While the code above works just fine, we could also write code chunks 2-6 together using %>%. Then we only have to call the data once rather than 5 times.
+```{r, results='hide', warning=FALSE, message=FALSE, eval=FALSE}
+ISS<-ISS%>%select(-contains("Incident"))%>%
+  rename(Student_ID=`Student ID`)%>%
+  mutate(Month=month(mdy(Date)), 
+         ISSvar=str_extract(Action, "ISS"))%>%
+  filter(ISSvar=="ISS")
+```
+
+#### Last we can make a codebook of variable descriptives
+Make a codebook using `makeCodebook`
+```{r, results='hide', warning=FALSE, message=FALSE, eval=FALSE}
+dataMaid::makeCodebook(ISSJoin, reportTitle="Codebook for R-ladies Discipline Data")
+```
+#### And we can export our data to share with others or analyze in other programs.
+Export Data using `write_csv`
+```{r, results='hide', warning=FALSE, message=FALSE, eval=FALSE}
+write_csv(ISSJoin,"Clean_Discipline_2018_19.csv")
+```
+#### Also, if you wanted your data in tidy format, you could restructure from wide to long
+```{r, warning=FALSE, message=FALSE}
+ISSLong<-ISSJoin%>%pivot_longer(cols=contains("ISS"), 
+                              names_to=c("Time",".value"), names_sep="_")
+
+head(as.data.frame(ISSLong))
+```

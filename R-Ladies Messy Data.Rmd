@@ -121,7 +121,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ## Common data cleaning (cont.)
 | Step                  | Package::Function                                              |
 | --------------------- | ---------------------------------------------------------------|
-| Fill missing values   | dplyr::coalesce                                                |
+| Fill missing values   | dplyr::coalesce; tidyr::fill                                   |
 | Long to Wide data     | tidyr::spread, pivot_wider                                     |
 | Wide to Long data     | tidyr::gather, pivot_longer                                    |
 | Merge data            | dplyr::left_join, right_join, full_join                        |

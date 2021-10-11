@@ -14,11 +14,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Install packages
 ```{r, results='hide', warning=FALSE, message=FALSE, eval=FALSE}
+
 install.packages(c("tidyverse", "lubridate","labelled", "dataMaid", "janitor"))
 ```
 
 Call the packages
 ```{r, results='hide', warning=FALSE, message=FALSE}
+
 library(tidyverse)
 library(lubridate)
 library(labelled)
@@ -26,13 +28,15 @@ library(labelled)
 
 What does our data currently look like?
 ```{r,echo=FALSE, message=FALSE}
-Demo<-read_csv("https://raw.githubusercontent.com/Cghlewis/R-Ladies-STL-Cleaning-Data-R/master/Data/Demographics.csv")
+
+Demo <- read_csv("https://raw.githubusercontent.com/Cghlewis/R-Ladies-STL-Cleaning-Data-R/master/Data/Demographics.csv")
 knitr::kable(head(Demo, 3))
 ```
 
 What do we want our data to look like?
 ```{r,echo=FALSE, message=FALSE}
-Demofinal<-read_csv("https://raw.githubusercontent.com/Cghlewis/R-Ladies-STL-Cleaning-Data-R/master/Data/Clean_Demographics_2018_19.csv")
+
+Demofinal <- read_csv("https://raw.githubusercontent.com/Cghlewis/R-Ladies-STL-Cleaning-Data-R/master/Data/Clean_Demographics_2018_19.csv")
 knitr::kable(head(Demofinal, 3))
 ```
 
@@ -49,54 +53,68 @@ knitr::kable(head(Demofinal, 3))
 
 Read in our demographics file using `read_csv`
 ```{r, results='hide', warning=FALSE, message=FALSE}
-Demo<-read_csv('https://raw.githubusercontent.com/Cghlewis/R-Ladies-STL-Cleaning-Data-R/master/Data/Demographics.csv', na="*")
+Demo <- read_csv('https://raw.githubusercontent.com/Cghlewis/R-Ladies-STL-Cleaning-Data-R/master/Data/Demographics.csv', na="*")
 ```
+
 Drop StudentName and ZipCode using `select`
 ```{r, warning=FALSE, message=FALSE}
+
 names(Demo)
-Demo<-Demo%>%select(-`Student Name`, -ZipCode)
+Demo <- Demo%>%select(-`Student Name`, -ZipCode)
 ```
+
 Rename Columns using `setNames`
 ```{r, results='hide', warning=FALSE, message=FALSE}
+
 names(Demo)
-Demo<-Demo%>%setNames(c("School_District", "Student_ID","Race", "Gender",
+Demo <- Demo %>% setNames(c("School_District", "Student_ID","Race", "Gender",
                                 "Fall_Attendance", "Spring_Attendance"))
 ```
+
 Filter out any NA StudentID using `filter`
 ```{r, warning=FALSE, message=FALSE}
+
 summary(Demo$Student_ID)
 
-Demo<-Demo%>%filter(!is.na(Student_ID))
+Demo <- Demo %>% filter(!is.na(Student_ID))
 
 summary(Demo$Student_ID)
 ```
+
 Check for duplicates and remove using `distinct`
 ```{r, warning=FALSE, message=FALSE}
+
 dim(Demo)
 
-distinct(Demo)%>%count()
+distinct(Demo) %>% count()
 
-Demo<-distinct(Demo)
+Demo <- distinct(Demo)
 
 dim(Demo)
 ```
+
 Transform School_District using `separate` 
 ```{r, warning=FALSE, message=FALSE}
+
 head(as.data.frame(Demo),2)
-Demo<-Demo%>%separate(School_District,into=c("School","District"), sep='-')
+Demo <- Demo %>% separate(School_District,into=c("School","District"), sep='-')
 head(as.data.frame(Demo),2)
+
 ```
+
 Change Fall_Attendance class into numeric using `as.numeric` and remove the % using `str_remove`
 ```{r, warning=FALSE, message=FALSE}
+
 head(as.data.frame(Demo),2)
 class(Demo$Fall_Attendance)
-Demo<-Demo%>%mutate(Fall_Attendance=as.numeric(str_remove(Fall_Attendance,"%")))
+Demo <- Demo %>% mutate(Fall_Attendance=as.numeric(str_remove(Fall_Attendance,"%")))
 head(as.data.frame(Demo),2)
 ```
 Last, recode variables.
 
 Change Race class into a factor and recode values using `recode_factor`
 ```{r, warning=FALSE, message=FALSE}
+
 class(Demo$Race)
 table(Demo$Race)
 
@@ -107,8 +125,10 @@ Demo<-Demo%>%mutate(Race=recode_factor(Race, 'W'="White", 'I'="American Indian",
 levels(Demo$Race)
 janitor::tabyl(Demo$Race)
 ```
+
 Change Gender class into factor and recode values using `recode_factor`
 ```{r, warning=FALSE, message=FALSE}
+
 class(Demo$Gender)
 table(Demo$Gender)
 
@@ -116,9 +136,12 @@ Demo<-Demo%>%mutate(Gender=recode_factor(Gender,`1`="Male", `2`="Female"))
 
 levels(Demo$Gender)
 ```
+
 Add variable labels using `var_label`
 ```{r, warning=FALSE, message=FALSE}
+
 names(Demo)
+
 var_label(Demo) <- list(School = "SchoolName",District="DistrictName", 
                                 Student_ID="Student ID", Race="Student Race", 
                                 Gender="Student Gender", Fall_Attendance="Percent Attendance Fall", 
@@ -127,11 +150,12 @@ var_label(Demo) <- list(School = "SchoolName",District="DistrictName",
 
 ##### While the code above works just fine, we could also write code chunks together using %>%. Then we only have to call the data once rather than 8 times.
 ```{r, results='hide', warning=FALSE, message=FALSE, eval=FALSE}
-Demo<-Demo%>%select(-`Student Name`, -ZipCode)%>%
+
+Demo <- Demo %>% select(-`Student Name`, -ZipCode)%>%
   setNames(c("School_District", "Student_ID","Race", "Gender",
-            "Fall_Attendance", "Spring_Attendance"))%>%
-  filter(!is.na(Student_ID))%>%distinct()%>%
-  separate(School_District,into=c("School","District"), sep='-')%>%
+            "Fall_Attendance", "Spring_Attendance")) %>%
+  filter(!is.na(Student_ID)) %>% distinct() %>%
+  separate(School_District,into=c("School","District"), sep='-') %>%
   mutate(Fall_Attendance=as.numeric(str_remove(Fall_Attendance,"%")),
                                     Race=recode_factor(Race, 'W'="White", 'I'="American Indian",
                                        'A'="Asian", 'B'="Black", 'H'="Latino/Hispanic",
@@ -142,15 +166,18 @@ Demo<-Demo%>%select(-`Student Name`, -ZipCode)%>%
 #### Last we can make a codebook of variable descriptives
 Make a codebook using `makeCodebook`
 ```{r, results='hide', warning=FALSE, message=FALSE, eval=FALSE}
+
 dataMaid::makeCodebook(Demo, reportTitle="Codebook for R-ladies Demographic Data")
 ```
 #### And we can export our data to share with others or analyze in other programs.
 Export Data using `write_csv`
 ```{r, results='hide', warning=FALSE, message=FALSE, eval=FALSE}
+
 write_csv(Demo,"Clean_Demographics_2018_19.csv")
 ```
 #### Also, if you wanted your data in tidy format, you could restructure from wide to long
 ```{r, warning=FALSE, message=FALSE}
+
 DemoLong<-Demo%>%pivot_longer(cols=contains("Attend"), 
                                           names_to=c("Time",".value"), names_sep="_")
 

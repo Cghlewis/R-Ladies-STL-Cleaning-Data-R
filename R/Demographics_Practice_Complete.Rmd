@@ -178,7 +178,7 @@ write_csv(Demo,"Clean_Demographics_2018_19.csv")
 #### Also, if you wanted your data in tidy format, you could restructure from wide to long
 ```{r, warning=FALSE, message=FALSE}
 
-DemoLong<-Demo%>%pivot_longer(cols=contains("Attend"), 
+DemoLong <- Demo %>% pivot_longer(cols=contains("Attend"), 
                                           names_to=c("Time",".value"), names_sep="_")
 
 head(as.data.frame(DemoLong))
